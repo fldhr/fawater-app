@@ -3,7 +3,11 @@ import autoTable from 'jspdf-autotable';
 import { Invoice, CalculatedInvoiceItem, InvoiceSummary, AppSettings, BusinessDetails } from '../types';
 import { INVOICE_CURRENCY } from '../constants';
 
-const ARABIC_FONT_BASE64 = '...'; // استبدلها بالخط الكامل فعليًا لاحقًا
+const ARABIC_FONT_BASE64 = '...';
+
+function reverseArabic(text: string): string {
+  return text.split('').reverse().join('');
+}
 
 async function loadArabicFont(doc: jsPDF) {
   const FONT_NAME = 'Amiri';
@@ -41,7 +45,7 @@ export const generateInvoicePdf = async (invoice: Invoice, calculatedItems: Calc
   doc.setFont(FONT_NAME);
   doc.setFontSize(18);
   doc.setTextColor(40);
-  doc.text(businessDetails.name ?? '', pageWidth - margin, yPos, { align: 'right' });
+  doc.text(reverseArabic(businessDetails.name ?? ''), pageWidth - margin, yPos, { align: 'right' });
   yPos += 8;
 
   if (businessDetails.logo) {
@@ -60,59 +64,65 @@ export const generateInvoicePdf = async (invoice: Invoice, calculatedItems: Calc
   doc.setTextColor(100);
 
   if (settings.showCommercialRegisterField && businessDetails.commercialRegister) {
-    doc.text(`السجل التجاري: ${businessDetails.commercialRegister}`, pageWidth - margin, yPos, { align: 'right' });
+    doc.text(reverseArabic(`السجل التجاري: ${businessDetails.commercialRegister}`), pageWidth - margin, yPos, { align: 'right' });
     yPos += 5;
   }
   if (businessDetails.taxNumber) {
-    doc.text(`الرقم الضريبي: ${businessDetails.taxNumber}`, pageWidth - margin, yPos, { align: 'right' });
+    doc.text(reverseArabic(`الرقم الضريبي: ${businessDetails.taxNumber}`), pageWidth - margin, yPos, { align: 'right' });
     yPos += 5;
   }
   if (settings.showBusinessAddressField && businessDetails.address) {
-    doc.text(`العنوان: ${businessDetails.address}`, pageWidth - margin, yPos, { align: 'right' });
+    doc.text(reverseArabic(`العنوان: ${businessDetails.address}`), pageWidth - margin, yPos, { align: 'right' });
     yPos += 5;
   }
   if (businessDetails.phone) {
-    doc.text(`الهاتف: ${businessDetails.phone}`, pageWidth - margin, yPos, { align: 'right' });
+    doc.text(reverseArabic(`الهاتف: ${businessDetails.phone}`), pageWidth - margin, yPos, { align: 'right' });
     yPos += 5;
   }
   if (settings.showWebsiteField && businessDetails.website) {
-    doc.text(`الموقع الإلكتروني: ${businessDetails.website}`, pageWidth - margin, yPos, { align: 'right' });
+    doc.text(reverseArabic(`الموقع الإلكتروني: ${businessDetails.website}`), pageWidth - margin, yPos, { align: 'right' });
     yPos += 7;
   }
 
   yPos += 5;
-  doc.setFont(FONT_NAME);
   doc.setFontSize(16);
   doc.setTextColor(40);
-  doc.text('فاتورة ضريبية', pageWidth / 2, yPos, { align: 'center' });
+  doc.text(reverseArabic('فاتورة ضريبية'), pageWidth / 2, yPos, { align: 'center' });
   yPos += 10;
 
-  doc.setFont(FONT_NAME);
   doc.setFontSize(10);
   doc.setTextColor(50);
   const clientBoxWidth = (pageWidth - 2 * margin) / 2 - 5;
   let rightBoxY = yPos;
-
-  doc.text(`رقم الفاتورة: ${invoice.id ?? ''}`, pageWidth - margin, rightBoxY, { align: 'right' });
+  doc.text(reverseArabic(`رقم الفاتورة: ${invoice.id ?? ''}`), pageWidth - margin, rightBoxY, { align: 'right' });
   rightBoxY += 6;
-  doc.text(`تاريخ الإصدار: ${invoice.issueDate ? new Date(invoice.issueDate).toLocaleDateString('ar-SA') : ''}`, pageWidth - margin, rightBoxY, { align: 'right' });
+  doc.text(reverseArabic(`تاريخ الإصدار: ${invoice.issueDate ? new Date(invoice.issueDate).toLocaleDateString('ar-SA') : ''}`), pageWidth - margin, rightBoxY, { align: 'right' });
 
   let leftBoxY = yPos;
-  doc.text('فاتورة إلى:', margin + clientBoxWidth, leftBoxY, { align: 'right' });
+  doc.text(reverseArabic('فاتورة إلى:'), margin + clientBoxWidth, leftBoxY, { align: 'right' });
   leftBoxY += 6;
-  doc.text(client.name ?? '', margin + clientBoxWidth, leftBoxY, { align: 'right' });
+  doc.text(reverseArabic(client.name ?? ''), margin + clientBoxWidth, leftBoxY, { align: 'right' });
   leftBoxY += 6;
   if (client.phone) {
-    doc.text(`جوال العميل: ${client.phone}`, margin + clientBoxWidth, leftBoxY, { align: 'right' });
+    doc.text(reverseArabic(`جوال العميل: ${client.phone}`), margin + clientBoxWidth, leftBoxY, { align: 'right' });
     leftBoxY += 6;
   }
   if (settings.showClientAddressField && client.address) {
-    doc.text(`الحي: ${client.address}`, margin + clientBoxWidth, leftBoxY, { align: 'right' });
+    doc.text(reverseArabic(`الحي: ${client.address}`), margin + clientBoxWidth, leftBoxY, { align: 'right' });
   }
 
   yPos = Math.max(rightBoxY, leftBoxY) + 10;
 
-  const head = [['الإجمالي', 'قيمة الضريبة', 'الضريبة %', 'الخصم %', 'سعر الوحدة', 'الكمية', 'المنتج/الخدمة']];
+  const head = [[
+    reverseArabic('الإجمالي'),
+    reverseArabic('قيمة الضريبة'),
+    reverseArabic('الضريبة %'),
+    reverseArabic('الخصم %'),
+    reverseArabic('سعر الوحدة'),
+    reverseArabic('الكمية'),
+    reverseArabic('المنتج/الخدمة')
+  ]];
+
   const body = calculatedItems.map(item => [
     `${item.total.toFixed(2)} ${INVOICE_CURRENCY}`,
     `${item.taxAmount.toFixed(2)} ${INVOICE_CURRENCY}`,
@@ -120,7 +130,7 @@ export const generateInvoicePdf = async (invoice: Invoice, calculatedItems: Calc
     settings.showDiscountField ? `${item.discountPercentage.toFixed(2)}%` : '-',
     `${item.unitPrice.toFixed(2)} ${INVOICE_CURRENCY}`,
     item.quantity.toString(),
-    item.productName,
+    reverseArabic(item.productName),
   ]);
 
   autoTable(doc, {
@@ -140,15 +150,6 @@ export const generateInvoicePdf = async (invoice: Invoice, calculatedItems: Calc
       halign: 'right',
       cellPadding: 2,
     },
-    columnStyles: {
-      0: { halign: 'right' },
-      1: { halign: 'right' },
-      2: { halign: 'center' },
-      3: { halign: 'center' },
-      4: { halign: 'right' },
-      5: { halign: 'center' },
-      6: { halign: 'right', cellWidth: 'auto' },
-    },
     margin: { right: margin, left: margin },
   });
 
@@ -158,22 +159,20 @@ export const generateInvoicePdf = async (invoice: Invoice, calculatedItems: Calc
   const summaryLabelX = summaryX + 40;
   const summaryValueX = summaryX;
 
-  doc.setFont(FONT_NAME);
   doc.setFontSize(10);
   doc.setTextColor(50);
-
-  doc.text('المجموع الفرعي:', summaryLabelX, yPos, { align: 'right' });
+  doc.text(reverseArabic('المجموع الفرعي:'), summaryLabelX, yPos, { align: 'right' });
   doc.text(`${summary.subtotal.toFixed(2)} ${INVOICE_CURRENCY}`, summaryValueX, yPos, { align: 'left' });
   yPos += 7;
 
   if (settings.showDiscountField) {
-    doc.text('إجمالي الخصم:', summaryLabelX, yPos, { align: 'right' });
+    doc.text(reverseArabic('إجمالي الخصم:'), summaryLabelX, yPos, { align: 'right' });
     doc.text(`${summary.totalDiscount.toFixed(2)} ${INVOICE_CURRENCY}`, summaryValueX, yPos, { align: 'left' });
     yPos += 7;
   }
 
   if (settings.showTaxField) {
-    doc.text('إجمالي الضريبة:', summaryLabelX, yPos, { align: 'right' });
+    doc.text(reverseArabic('إجمالي الضريبة:'), summaryLabelX, yPos, { align: 'right' });
     doc.text(`${summary.totalTax.toFixed(2)} ${INVOICE_CURRENCY}`, summaryValueX, yPos, { align: 'left' });
     yPos += 7;
   }
@@ -184,27 +183,25 @@ export const generateInvoicePdf = async (invoice: Invoice, calculatedItems: Calc
   doc.setFontSize(12);
   doc.setFont(FONT_NAME, 'bold');
   doc.setTextColor(16, 128, 103);
-  doc.text('الإجمالي النهائي:', summaryLabelX, yPos, { align: 'right' });
+  doc.text(reverseArabic('الإجمالي النهائي:'), summaryLabelX, yPos, { align: 'right' });
   doc.text(`${summary.grandTotal.toFixed(2)} ${INVOICE_CURRENCY}`, summaryValueX, yPos, { align: 'left' });
   yPos += 10;
 
   doc.setFont(FONT_NAME, 'normal');
 
   if (invoice.notes) {
-    doc.setFont(FONT_NAME);
     doc.setFontSize(10);
     doc.setTextColor(80);
-    doc.text('الملاحظات:', pageWidth - margin, yPos, { align: 'right' });
+    doc.text(reverseArabic('الملاحظات:'), pageWidth - margin, yPos, { align: 'right' });
     yPos += 5;
-    const notesLines = doc.splitTextToSize(invoice.notes, pageWidth - 2 * margin - 20);
+    const notesLines = doc.splitTextToSize(reverseArabic(invoice.notes), pageWidth - 2 * margin - 20);
     doc.text(notesLines, pageWidth - margin, yPos, { align: 'right' });
     yPos += notesLines.length * 5;
   }
 
-  doc.setFont(FONT_NAME);
   doc.setFontSize(8);
   doc.setTextColor(150);
-  doc.text('شكراً لتعاملكم معنا!', pageWidth / 2, pageHeight - margin / 2, { align: 'center' });
+  doc.text(reverseArabic('شكراً لتعاملكم معنا!'), pageWidth / 2, pageHeight - margin / 2, { align: 'center' });
 
   return doc.output('datauristring');
 };
