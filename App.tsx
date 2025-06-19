@@ -76,7 +76,7 @@ const Footer: React.FC = () => {
   return (
     <footer className="bg-neutral-dark text-neutral-light py-4 text-center text-sm">
       <div className="container mx-auto">
-        <p>&copy; {new Date().getFullYear()} جميع الحقوق محفوظة. نظام الفواتير الإلكترونية.</p>
+        <p>&copy; {new Date().getFullYear()} جميع الحقوق محفوظة. Mohammed ALQarni :) .</p>
       </div>
     </footer>
   );
